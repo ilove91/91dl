@@ -48,8 +48,7 @@ func init() {
 	cobra.OnInitialize(initConfig)
 
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is ./config.yaml)")
-	rootCmd.PersistentFlags().Int("gn", 5, "number of goroutines to download")
-	rootCmd.PersistentFlags().StringP("dir", "d", "", "directory to save videos (default is ./videos_'date'/)")
+	rootCmd.PersistentFlags().StringP("dir", "d", "", "directory to save videos (default is ./91videos/)")
 	rootCmd.PersistentFlags().String("proxy", "", "net proxy, support http/socks5")
 	viper.BindPFlags(rootCmd.PersistentFlags())
 }

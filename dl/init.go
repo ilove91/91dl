@@ -20,44 +20,37 @@ import (
 	"net/http"
 	"net/url"
 	"os"
-	"time"
 
+	"github.com/cavaliercoder/grab"
 	"github.com/spf13/viper"
 )
 
-var gn int
 var dir string
 var proxy *url.URL
 var client *http.Client
+var dler *grab.Client
 
 // Initialize on root
 func Initialize() {
-	// goroutines number
-	gn = viper.GetInt("gn")
-	if gn > 20 {
-		gn = 20
-	}
-	if gn < 1 {
-		gn = 5
-	}
-
 	// proxy
 	proxyStr := viper.GetString("proxy")
 	if proxyStr == "" {
 		proxy = nil
-		client = &http.Client{Timeout: time.Second * 10}
+		client = &http.Client{}
 	} else {
 		proxy, err := url.ParseRequestURI(proxyStr)
 		if err != nil {
 			log.Fatalf("Proxy Error: %s\n", err)
 		}
-		client = &http.Client{Transport: &http.Transport{Proxy: http.ProxyURL(proxy)}, Timeout: time.Second * 10}
+		client = &http.Client{Transport: &http.Transport{Proxy: http.ProxyURL(proxy)}}
 	}
+	dler = grab.NewClient()
+	dler.HTTPClient = client
 
 	// saving dir
 	dir = viper.GetString("dir")
 	if dir == "" {
-		dir = fmt.Sprintf("videos_%s", time.Now().Format("2006-01-02"))
+		dir = "91videos"
 	}
 	if _, err := os.Stat(dir); os.IsNotExist(err) {
 		if err := os.MkdirAll(dir, 0700); err != nil {
@@ -67,6 +60,8 @@ func Initialize() {
 
 	fmt.Println("===========================================================================")
 	fmt.Printf("Saving Videos to: %s\n", dir)
-	fmt.Printf("Goroutines: %d, Proxy: %s\n", gn, proxyStr)
+	if proxyStr != "" {
+		fmt.Printf("Proxy on: %s\n", proxyStr)
+	}
 	fmt.Println("===========================================================================")
 }

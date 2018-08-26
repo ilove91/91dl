@@ -16,93 +16,69 @@ package dl
 
 import (
 	"fmt"
-	"io"
-	"net/http"
-	"os"
 	"time"
 
-	"github.com/Pallinder/go-randomdata"
-	dler "github.com/joeybloggs/go-download"
+	"github.com/cavaliercoder/grab"
 	"github.com/vbauerster/mpb"
 	"github.com/vbauerster/mpb/decor"
 )
 
 func download(i int, v *video, cgn int) error {
-	fmt.Printf("%3d %s\n", i, v.title)
-	destFile := fmt.Sprintf("%s/%s.mp4", dir, v.title)
-	if _, err := os.Stat(destFile); err == nil {
-		fmt.Println("Exists, Skip")
-		return nil
-	}
+	fmt.Printf("Grab %3d %s\n", i, v.title)
 
-	progress := mpb.New(
+	// build request
+	req, _ := grab.NewRequest("", v.src)
+	req.Filename = fmt.Sprintf("%s/%s.mp4", dir, v.title)
+
+	// start download
+	resp := dler.Do(req)
+
+	// progress bar
+	p := mpb.New(
 		mpb.WithWidth(60),
 		mpb.WithFormat("[=>-|"),
-		mpb.WithRefreshRate(150*time.Millisecond),
+		mpb.WithRefreshRate(200*time.Millisecond),
 	)
-	defer progress.Wait()
-	var bs []*mpb.Bar
+	defer p.Wait()
 
-	options := &dler.Options{
-		Request: req,
-		Client:  customClient,
-		Concurrency: func(size int64) int {
-			if cgn == -1 {
-				return gn
-			}
-			return cgn
-		},
-		Proxy: func(name string, download int, size int64, r io.Reader) io.Reader {
-			bar := progress.AddBar(size,
-				mpb.PrependDecorators(
-					decor.CountersKibiByte("% 6.1f / % 6.1f"),
-				),
-				mpb.AppendDecorators(
-					decor.EwmaETA(decor.ET_STYLE_MMSS, float64(size)/2048),
-					decor.Name(" ] "),
-					decor.AverageSpeed(decor.UnitKiB, "% .2f"),
-				),
-				mpb.BarRemoveOnComplete(),
-			)
-			bs = append(bs, bar)
-			return bar.ProxyReader(r)
-		},
-	}
+	bar := p.AddBar(resp.Size,
+		mpb.PrependDecorators(
+			decor.Elapsed(decor.ET_STYLE_MMSS),
+			decor.CountersKibiByte(" % 6.1f / % 6.1f"),
+		),
+		mpb.AppendDecorators(
+			customETA(decor.ET_STYLE_MMSS, resp),
+			decor.Name(" ] "),
+			customSpeed(decor.UnitKiB, "% .2f", resp),
+		),
+		mpb.BarRemoveOnComplete(),
+	)
 
-	f, err := dler.Open(v.src, options)
-	if err != nil {
-		for i := 0; i < len(bs); i++ {
-			progress.Abort(bs[i], true)
+	complete := 0
+	delta := 0
+
+	t := time.NewTicker(500 * time.Millisecond)
+	defer t.Stop()
+
+Loop:
+	for {
+		select {
+		case <-t.C:
+			delta = int(resp.BytesComplete()) - complete
+			bar.IncrBy(delta)
+			complete += delta
+		case <-resp.Done:
+			delta = int(resp.BytesComplete()) - complete
+			bar.IncrBy(delta)
+			complete += delta
+			break Loop
 		}
-		return fmt.Errorf("fail to download %s(%s): %s", destFile, v.url, err)
-	}
-	defer f.Close()
-
-	dest, err := os.Create(destFile)
-	if err != nil {
-		return fmt.Errorf("fail to create %s(%s): %s", destFile, v.url, err)
-	}
-	defer dest.Close()
-
-	_, err = io.Copy(dest, f)
-	if err != nil {
-		return fmt.Errorf("fail to save %s(%s): %s", destFile, v.url, err)
 	}
 
+	// check for errors
+	if err := resp.Err(); err != nil {
+		p.Abort(bar, true)
+		return fmt.Errorf("download error %s: %s", req.Filename, err)
+	}
 	return nil
-}
-
-func req(r *http.Request) {
-	r.Header.Set("Accept-Language", "zh-CN,zh;q=0.9,en;q=0.8")
-	r.Header.Set("Cache-Control", "max-age=0")
-	r.Header.Set("Connection", "keep-alive")
-	r.Header.Set("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/68.0.3440.106 Safari/537.36")
-	r.Header.Set("X-Forwarded-For", randomdata.IpV4Address())
-}
-
-func customClient() http.Client {
-	if proxy != nil {
-		return http.Client{Transport: &http.Transport{Proxy: http.ProxyURL(proxy)}}
-	}
-	return http.Client{}
 }

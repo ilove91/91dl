@@ -30,6 +30,7 @@ func LinksDl(vlinks []string) {
 			continue
 		}
 		fmt.Println(v.title)
+		fmt.Println(v.url)
 		vs = append(vs, v)
 	}
 
