@@ -29,9 +29,12 @@ var dir string
 var proxy *url.URL
 var client *http.Client
 var dler *grab.Client
+var excludeIPs []string
 
 // Initialize on root
 func Initialize() {
+	excludeIPs = viper.GetStringSlice("exclude")
+
 	// proxy
 	proxyStr := viper.GetString("proxy")
 	if proxyStr == "" {
@@ -63,5 +66,6 @@ func Initialize() {
 	if proxyStr != "" {
 		fmt.Printf("Proxy on: %s\n", proxyStr)
 	}
+	fmt.Printf("Exclude Video Host IPs: %s\n", excludeIPs)
 	fmt.Println("===========================================================================")
 }

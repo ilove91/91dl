@@ -38,6 +38,6 @@ func init() {
 	rootCmd.AddCommand(pagesCmd)
 
 	pagesCmd.Flags().StringVarP(&t, "type", "t", "hot", "category type: [new hot rp long md tf mf rf top top-1 hd]")
-	pagesCmd.Flags().IntVarP(&p1, "start", "s", 1, "start page")
-	pagesCmd.Flags().IntVarP(&p2, "end", "e", 1, "end page")
+	pagesCmd.Flags().IntVar(&p1, "st", 1, "start page")
+	pagesCmd.Flags().IntVar(&p2, "ed", 1, "end page")
 }

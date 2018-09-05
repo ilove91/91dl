@@ -26,11 +26,11 @@ Available Commands:
   version     Print version info
 
 Flags:
-      --config string   config file (default is ./config.yaml)
-  -d, --dir string      directory to save videos (default is ./videos_'date'/)
-      --gn int          number of goroutines to download (default 5)
-  -h, --help            help for 91dl
-      --proxy string    net proxy, support http/socks5
+      --config string     config file (default is ./config.yaml)
+  -d, --dir string        directory to save videos (default is ./91videos/)
+  -e, --exclude strings   exclude video host IPs
+  -h, --help              help for 91dl
+      --proxy string      net proxy, support http/socks5
 
 Use "91dl [command] --help" for more information about a command.
 ```

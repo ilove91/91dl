@@ -50,6 +50,7 @@ func init() {
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is ./config.yaml)")
 	rootCmd.PersistentFlags().StringP("dir", "d", "", "directory to save videos (default is ./91videos/)")
 	rootCmd.PersistentFlags().String("proxy", "", "net proxy, support http/socks5")
+	rootCmd.PersistentFlags().StringSliceP("exclude", "e", nil, "exclude video host IPs")
 	viper.BindPFlags(rootCmd.PersistentFlags())
 }
 

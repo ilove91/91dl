@@ -18,6 +18,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"net/url"
 	"strings"
 
 	"github.com/Pallinder/go-randomdata"
@@ -30,8 +31,8 @@ type video struct {
 	src   string
 }
 
-func getHTML(url string) (*goquery.Document, error) {
-	req := buildReq(url)
+func getHTML(u string) (*goquery.Document, error) {
+	req := buildReq(u)
 
 	resp, err := client.Do(req)
 	if err != nil {
@@ -45,8 +46,8 @@ func getHTML(url string) (*goquery.Document, error) {
 	return doc, nil
 }
 
-func parseList(url string) []string {
-	doc, err := getHTML(url)
+func parsePage(u string) []string {
+	doc, err := getHTML(u)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -63,21 +64,30 @@ func parseList(url string) []string {
 	return links
 }
 
-func parseVideo(url string) (*video, error) {
-	doc, err := getHTML(url)
-	if err != nil {
-		return nil, err
+func parseVideo(u string) (*video, error) {
+	for i := 0; i < 5; i++ {
+		doc, err := getHTML(u)
+		if err != nil {
+			return nil, err
+		}
+
+		src, _ := doc.Find("video").Find("source").Attr("src")
+		if src == "" {
+			return nil, fmt.Errorf("no src on %s", u)
+		}
+
+		a, err := url.Parse(src)
+		if err != nil {
+			return nil, err
+		}
+
+		if stringNotInSlice(a.Host, excludeIPs) {
+			title := doc.Find("div#viewvideo-title").Text()
+			title = titleForm(title)
+			return &video{u, title, src}, nil
+		}
 	}
-
-	src, _ := doc.Find("video").Find("source").Attr("src")
-	title := doc.Find("div#viewvideo-title").Text()
-	title = titleForm(title)
-
-	if src == "" {
-		return nil, fmt.Errorf("no src on %s", url)
-	}
-
-	return &video{url, title, src}, nil
+	return nil, fmt.Errorf("no non-excludeIPs src on %s", u)
 }
 
 func titleForm(title string) string {
@@ -86,10 +96,10 @@ func titleForm(title string) string {
 	return strings.TrimSpace(title)
 }
 
-func buildReq(url string) *http.Request {
-	req, err := http.NewRequest("GET", url, nil)
+func buildReq(u string) *http.Request {
+	req, err := http.NewRequest("GET", u, nil)
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 
 	req.Header.Set("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8")
@@ -102,4 +112,13 @@ func buildReq(url string) *http.Request {
 	req.Header.Set("X-Forwarded-For", randomdata.IpV4Address())
 
 	return req
+}
+
+func stringNotInSlice(a string, s []string) bool {
+	for _, b := range s {
+		if b == a {
+			return false
+		}
+	}
+	return true
 }

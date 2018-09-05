@@ -23,8 +23,8 @@ var baseURL = "http://91porn.com"
 // LinksDl download by links
 func LinksDl(vlinks []string) {
 	var vs []*video
-	for i := 0; i < len(vlinks); i++ {
-		v, err := parseVideo(vlinks[i])
+	for _, u := range vlinks {
+		v, err := parseVideo(u)
 		if err != nil {
 			fmt.Printf("Cannot parse url to video: %s\n", err)
 			continue
@@ -36,16 +36,17 @@ func LinksDl(vlinks []string) {
 
 	fmt.Printf("Find %d Videos\n", len(vs))
 	var wvs []*video
-	for i := 0; i < len(vs); i++ {
-		if err := download(i, vs[i], -1); err != nil {
+	for i, v := range vs {
+		if err := download(i, v); err != nil {
+			fmt.Println(v.src)
 			fmt.Println(err)
-			wvs = append(wvs, vs[i])
+			wvs = append(wvs, v)
 		}
 	}
 
 	fmt.Printf("Redownloading %d Error Videos\n", len(wvs))
-	for i := 0; i < len(wvs); i++ {
-		if err := download(i, wvs[i], 1); err != nil {
+	for i, v := range wvs {
+		if err := download(i, v); err != nil {
 			fmt.Println(err)
 		}
 	}
@@ -70,7 +71,7 @@ func PagesDl(p1 int, p2 int, t string) {
 		default:
 			url = fmt.Sprintf("%s/v.php?category=%s&viewtype=basic&page=%d", baseURL, t, i)
 		}
-		vl := parseList(url)
+		vl := parsePage(url)
 		fmt.Printf("Downloading page %d ...\n", i)
 		LinksDl(vl)
 		fmt.Println("===========================================================================")
