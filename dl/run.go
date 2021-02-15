@@ -16,6 +16,8 @@ package dl
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
 
 	"github.com/ilove91/91dl/m3u8"
 	log "github.com/sirupsen/logrus"
@@ -38,10 +40,14 @@ func LinksDl(vlinks []string) {
 	log.Infof("Total videos: %d", len(vs))
 
 	for i, v := range vs {
-		log.Infof("Downloading %3d  %s ...", i+1, v.title)
-		err := m3u8.Download(v.videoSrc, v.title, destDir, 25)
-		if err != nil {
-			log.Error(err)
+		if _, err := os.Stat(filepath.Join(destDir, v.title+".mp4")); os.IsNotExist(err) {
+			log.Infof("Downloading %3d  %s ...", i+1, v.title)
+			err := m3u8.Download(v.videoSrc, v.title, destDir, 25)
+			if err != nil {
+				log.Error(err)
+			}
+		} else {
+			log.Infof("Exists %3d  %s ...", i+1, v.title)
 		}
 	}
 }
