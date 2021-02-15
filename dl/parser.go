@@ -15,20 +15,19 @@
 package dl
 
 import (
-	"fmt"
-	"log"
 	"net/http"
-	"net/url"
+	"regexp"
 	"strings"
 
 	"github.com/Pallinder/go-randomdata"
 	"github.com/PuerkitoBio/goquery"
+	log "github.com/sirupsen/logrus"
 )
 
 type video struct {
-	url   string
-	title string
-	src   string
+	webURL   string
+	title    string
+	videoSrc string
 }
 
 func getHTML(u string) (*goquery.Document, error) {
@@ -53,10 +52,11 @@ func parsePage(u string) []string {
 	}
 
 	var links []string
-	doc.Find(".listchannel a").Each(func(index int, item *goquery.Selection) {
-		linkTag := item
-		link, _ := linkTag.Attr("href")
-		title, _ := linkTag.Attr("title")
+	doc.Find(".videos-text-align a").Each(func(index int, item *goquery.Selection) {
+		link, _ := item.Attr("href")
+		title := item.Find(".video-title").Text()
+		log.Infof("%3d  %s", index+1, title)
+		log.Info(link)
 		if title != "" {
 			links = append(links, link)
 		}
@@ -65,35 +65,31 @@ func parsePage(u string) []string {
 }
 
 func parseVideo(u string) (*video, error) {
-	for i := 0; i < 5; i++ {
-		doc, err := getHTML(u)
-		if err != nil {
-			return nil, err
-		}
-
-		src, _ := doc.Find("video").Find("source").Attr("src")
-		if src == "" {
-			return nil, fmt.Errorf("no src on %s", u)
-		}
-
-		a, err := url.Parse(src)
-		if err != nil {
-			return nil, err
-		}
-
-		if stringNotInSlice(a.Host, excludeIPs) {
-			title := doc.Find("div#viewvideo-title").Text()
-			title = titleForm(title)
-			return &video{u, title, src}, nil
-		}
+	doc, err := getHTML(u)
+	if err != nil {
+		return nil, err
 	}
-	return nil, fmt.Errorf("no non-excludeIPs src on %s", u)
-}
 
-func titleForm(title string) string {
-	r := strings.NewReplacer("/", " ", "\\", " ", ":", " ", "*", " ", "?", " ", "|", " ", "\"", " ", "<", " ", ">", " ")
-	title = r.Replace(title)
-	return strings.TrimSpace(title)
+	title := doc.Find("h4[align]").Text()
+	title = strings.TrimSpace(title)
+	title = strings.ReplaceAll(title, "\n", "")
+
+	encrypted := doc.Find("video").Find("script").Text()
+	compile := regexp.MustCompile(`document.write\(strencode2\("(.*)"`)
+	submatch := compile.FindAllStringSubmatch(encrypted, -1)
+	encrypted = submatch[0][1]
+
+	decrypted, err := jsvm.Call("strencode2", nil, encrypted)
+
+	compile = regexp.MustCompile(`<source src='(.*)' type=`)
+	submatch = compile.FindAllStringSubmatch(decrypted.String(), -1)
+	videoSrc := submatch[0][1]
+
+	// log.Info(title)
+	// log.Info(u)
+	// log.Info(videoSrc)
+
+	return &video{u, title, videoSrc}, nil
 }
 
 func buildReq(u string) *http.Request {
@@ -112,13 +108,4 @@ func buildReq(u string) *http.Request {
 	req.Header.Set("X-Forwarded-For", randomdata.IpV4Address())
 
 	return req
-}
-
-func stringNotInSlice(a string, s []string) bool {
-	for _, b := range s {
-		if b == a {
-			return false
-		}
-	}
-	return true
 }

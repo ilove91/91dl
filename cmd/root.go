@@ -30,9 +30,8 @@ var rootCmd = &cobra.Command{
 	Short: "Downloader for 91porn",
 	Long: `Downloader for 91porn
 
-Category: new-最新 hot-当前最热 rp-最近得分 long-10分钟以上
-          md-本月讨论 tf-本月收藏 mf-收藏最多 rf-最近加精 
-          top-本月最热 top-1-上月最热 hd-高清`,
+Category: new-最新 hot-当前最热 top-本月最热 long-10分钟以上 longer-20分钟以上
+          md-本月讨论 tf-本月收藏 mf-收藏最多 rf-最近加精 hd-高清 lasttop-上月最热`,
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.

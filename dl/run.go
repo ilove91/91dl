@@ -16,6 +16,9 @@ package dl
 
 import (
 	"fmt"
+
+	"github.com/ilove91/91dl/m3u8"
+	log "github.com/sirupsen/logrus"
 )
 
 var baseURL = "http://91porn.com"
@@ -26,28 +29,19 @@ func LinksDl(vlinks []string) {
 	for _, u := range vlinks {
 		v, err := parseVideo(u)
 		if err != nil {
-			fmt.Printf("Cannot parse url to video: %s\n", err)
+			log.Errorf("Cannot parse url to video: %s", err)
 			continue
 		}
-		fmt.Println(v.title)
-		fmt.Println(v.url)
 		vs = append(vs, v)
 	}
 
-	fmt.Printf("Find %d Videos\n", len(vs))
-	var wvs []*video
-	for i, v := range vs {
-		if err := download(i, v); err != nil {
-			fmt.Println(v.src)
-			fmt.Println(err)
-			wvs = append(wvs, v)
-		}
-	}
+	log.Infof("Total videos: %d", len(vs))
 
-	fmt.Printf("Redownloading %d Error Videos\n", len(wvs))
-	for i, v := range wvs {
-		if err := download(i, v); err != nil {
-			fmt.Println(err)
+	for i, v := range vs {
+		log.Infof("Downloading %3d  %s ...", i+1, v.title)
+		err := m3u8.Download(v.videoSrc, v.title, "91videos", 25)
+		if err != nil {
+			log.Error(err)
 		}
 	}
 }
@@ -58,22 +52,22 @@ func PagesDl(p1 int, p2 int, t string) {
 	if p1 > p2 {
 		p1 = p2
 	}
-	fmt.Printf("Download category %s from page %d to %d\n", t, p1, p2)
-	fmt.Println("===========================================================================")
+	log.Infof("Download category %s from page %d to %d", t, p1, p2)
+	log.Info("===========================================================================")
 
 	var url string
 	for i := p1; i <= p2; i++ {
 		switch t {
 		case "new":
 			url = fmt.Sprintf("%s/v.php?next=watch&page=%d", baseURL, i)
-		case "top-1":
+		case "lasttop":
 			url = fmt.Sprintf("%s/v.php?category=%s&m=-1&viewtype=basic&page=%d", baseURL, t, i)
 		default:
 			url = fmt.Sprintf("%s/v.php?category=%s&viewtype=basic&page=%d", baseURL, t, i)
 		}
 		vl := parsePage(url)
-		fmt.Printf("Downloading page %d ...\n", i)
+		log.Infof("Downloading page %d ...", i)
 		LinksDl(vl)
-		fmt.Println("===========================================================================")
+		log.Info("===========================================================================")
 	}
 }
