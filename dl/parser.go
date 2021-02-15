@@ -17,6 +17,7 @@ package dl
 import (
 	"fmt"
 	"net/http"
+	"net/url"
 	"regexp"
 	"strings"
 
@@ -78,6 +79,9 @@ func parseVideo(u string) (*video, error) {
 	encrypted := doc.Find("video").Find("script").Text()
 	compile := regexp.MustCompile(`document.write\(strencode2\("(.*)"`)
 	submatch := compile.FindAllStringSubmatch(encrypted, -1)
+	if len(submatch) != 1 {
+		return nil, fmt.Errorf("encrypted %s, %s", encrypted, submatch)
+	}
 	encrypted = submatch[0][1]
 
 	decrypted, err := jsvm.Call("strencode2", nil, encrypted)
@@ -85,9 +89,15 @@ func parseVideo(u string) (*video, error) {
 	compile = regexp.MustCompile(`<source src='(.*)' type=`)
 	submatch = compile.FindAllStringSubmatch(decrypted.String(), -1)
 	videoSrc := submatch[0][1]
+	if _, err := url.Parse(videoSrc); err != nil {
+		return nil, fmt.Errorf("video src %s", videoSrc)
+	}
 
-	compile = regexp.MustCompile(`/([\d]*).m3u8\?`)
+	compile = regexp.MustCompile(`m3u8/[\d]*/([\d]*).m3u8`)
 	submatch = compile.FindAllStringSubmatch(videoSrc, -1)
+	if len(submatch) != 1 {
+		return nil, fmt.Errorf("video number %s, %s", videoSrc, submatch)
+	}
 	number := submatch[0][1]
 	title = fmt.Sprintf("[%s] %s", number, title)
 
