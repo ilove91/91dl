@@ -39,7 +39,7 @@ func LinksDl(vlinks []string) {
 
 	for i, v := range vs {
 		log.Infof("Downloading %3d  %s ...", i+1, v.title)
-		err := m3u8.Download(v.videoSrc, v.title, "91videos", 25)
+		err := m3u8.Download(v.videoSrc, v.title, destDir, 25)
 		if err != nil {
 			log.Error(err)
 		}
