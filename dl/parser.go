@@ -100,6 +100,8 @@ func parseVideo(u string) (*video, error) {
 	}
 	number := submatch[0][1]
 	title = fmt.Sprintf("[%s] %s", number, title)
+	r := strings.NewReplacer("\\", " ", "/", " ", ":", " ", "*", " ", "?", " ", "\"", " ", "<", " ", ">", " ", "|", " ")
+	title = r.Replace(title)
 
 	// log.Info(title)
 	// log.Info(u)
