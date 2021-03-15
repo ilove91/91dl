@@ -72,7 +72,8 @@ func parseVideo(u string) (*video, error) {
 		return nil, err
 	}
 
-	title := doc.Find("h4[align]").Text()
+	title := doc.Find("title").Text()
+	title = strings.ReplaceAll(title, "Chinese homemade video", "")
 	title = strings.TrimSpace(title)
 	title = strings.ReplaceAll(title, "\n", "")
 
