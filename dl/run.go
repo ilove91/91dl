@@ -67,7 +67,7 @@ func PagesDl(p1 int, p2 int, t string) {
 		case "new":
 			url = fmt.Sprintf("%s/v.php?next=watch&page=%d", baseURL, i)
 		case "lasttop":
-			url = fmt.Sprintf("%s/v.php?category=%s&m=-1&viewtype=basic&page=%d", baseURL, t, i)
+			url = fmt.Sprintf("%s/v.php?category=top&m=-1&viewtype=basic&page=%d", baseURL, i)
 		default:
 			url = fmt.Sprintf("%s/v.php?category=%s&viewtype=basic&page=%d", baseURL, t, i)
 		}

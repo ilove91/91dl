@@ -78,14 +78,20 @@ func parseVideo(u string) (*video, error) {
 	title = strings.ReplaceAll(title, "\n", "")
 
 	encrypted := doc.Find("video").Find("script").Text()
+	if encrypted == "" {
+		return nil, fmt.Errorf("found no encrypt str")
+	}
 	compile := regexp.MustCompile(`document.write\(strencode2\("(.*)"`)
 	submatch := compile.FindAllStringSubmatch(encrypted, -1)
 	if len(submatch) != 1 {
-		return nil, fmt.Errorf("encrypted %s, %s", encrypted, submatch)
+		return nil, fmt.Errorf("parse encrypt str err, encrypt str: %s, submatch: %s", encrypted, submatch)
 	}
 	encrypted = submatch[0][1]
 
 	decrypted, err := jsvm.Call("strencode2", nil, encrypted)
+	if err != nil {
+		return nil, fmt.Errorf("js decrypt err: %v, encrypt str: %v", err, encrypted)
+	}
 
 	compile = regexp.MustCompile(`<source src='(.*)' type=`)
 	submatch = compile.FindAllStringSubmatch(decrypted.String(), -1)
