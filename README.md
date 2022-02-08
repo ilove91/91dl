@@ -1,6 +1,8 @@
 # 91dl
 91porn视频下载器
 
+WARNING: *小撸怡情，中撸伤身，强撸灰飞烟灭*
+
 ## 下载安装
 
 需要go 1.16版本
@@ -13,6 +15,7 @@ go get -u github.com/ilove91/91dl
 
 ```
 91porn视频下载器
+WARNING: *小撸怡情，中撸伤身，强撸灰飞烟灭*
 
 类别代码:
 ori-91原创 new-最新 hot-当前最热 top-本月最热 mf-收藏最多
