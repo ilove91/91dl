@@ -77,7 +77,7 @@ func parseVideo(u string) (*video, error) {
 	title = strings.TrimSpace(title)
 	title = strings.ReplaceAll(title, "\n", "")
 
-	author := doc.Find(".title-yakov a").Text()
+	author := doc.Find(".title-yakov a span").Text()
 	author = strings.TrimSpace(author)
 
 	encrypted := doc.Find("video").Find("script").Text()
