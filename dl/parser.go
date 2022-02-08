@@ -77,6 +77,9 @@ func parseVideo(u string) (*video, error) {
 	title = strings.TrimSpace(title)
 	title = strings.ReplaceAll(title, "\n", "")
 
+	author := doc.Find(".title-yakov a").Text()
+	author = strings.TrimSpace(author)
+
 	encrypted := doc.Find("video").Find("script").Text()
 	if encrypted == "" {
 		return nil, fmt.Errorf("found no encrypt str")
@@ -106,7 +109,7 @@ func parseVideo(u string) (*video, error) {
 		return nil, fmt.Errorf("video number %s, %s", videoSrc, submatch)
 	}
 	number := submatch[0][1]
-	title = fmt.Sprintf("[%s] %s", number, title)
+	title = fmt.Sprintf("[%s] [%s] %s", number, author, title)
 	r := strings.NewReplacer("\\", " ", "/", " ", ":", " ", "*", " ", "?", " ", "\"", " ", "<", " ", ">", " ", "|", " ")
 	title = r.Replace(title)
 
