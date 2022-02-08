@@ -57,8 +57,7 @@ func parsePage(u string) []string {
 	doc.Find(".videos-text-align a").Each(func(index int, item *goquery.Selection) {
 		link, _ := item.Attr("href")
 		title := item.Find(".video-title").Text()
-		log.Infof("%3d  %s", index+1, title)
-		log.Info(link)
+		log.Infof("%3d  %s url: %v", index+1, title, link)
 		if title != "" {
 			links = append(links, link)
 		}

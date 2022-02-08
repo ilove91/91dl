@@ -64,7 +64,7 @@ func Initialize() {
 	jsvm = otto.New()
 	jsvm.Run(jsCode)
 
-	log.Info("===========================================================================")
+	log.Info("======================================")
 	log.Infof("Saving Videos to: %s", destDir)
 	if proxyStr != "" {
 		log.Infof("Proxy on: %s", proxyStr)

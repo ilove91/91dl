@@ -59,7 +59,7 @@ func PagesDl(p1 int, p2 int, t string) {
 		p1 = p2
 	}
 	log.Infof("Download category %s from page %d to %d", t, p1, p2)
-	log.Info("===========================================================================")
+	log.Info("======================================")
 
 	var url string
 	for i := p1; i <= p2; i++ {
@@ -75,6 +75,6 @@ func PagesDl(p1 int, p2 int, t string) {
 		vl := parsePage(url)
 		log.Infof("Downloading category %s page %d ...", t, i)
 		LinksDl(vl)
-		log.Info("===========================================================================")
+		log.Info("======================================")
 	}
 }
