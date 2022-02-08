@@ -31,7 +31,7 @@ func LinksDl(vlinks []string) {
 	for _, u := range vlinks {
 		v, err := parseVideo(u)
 		if err != nil {
-			log.Errorf("Cannot parse url to video: %s", err)
+			log.Errorf("video parse err: %v, url: %v", err, u)
 			continue
 		}
 		vs = append(vs, v)
@@ -71,8 +71,9 @@ func PagesDl(p1 int, p2 int, t string) {
 		default:
 			url = fmt.Sprintf("%s/v.php?category=%s&viewtype=basic&page=%d", baseURL, t, i)
 		}
+		log.Infof("Category %s page %d url: %v", t, i, url)
 		vl := parsePage(url)
-		log.Infof("Downloading page %d ...", i)
+		log.Infof("Downloading category %s page %d ...", t, i)
 		LinksDl(vl)
 		log.Info("===========================================================================")
 	}

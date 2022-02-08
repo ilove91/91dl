@@ -1,36 +1,66 @@
 # 91dl
-91porn downloader &amp; spider
+91porn视频下载器
 
-## Installation
+## 下载安装
+
+需要go 1.16版本
 
 ```go
 go get -u github.com/ilove91/91dl
 ```
 
-## Usage
+## 使用方法
 
 ```
-Downloader for 91porn
+91porn视频下载器
 
-Category: new-最新 hot-当前最热 rp-最近得分 long-10分钟以上
-          md-本月讨论 tf-本月收藏 mf-收藏最多 rf-最近加精
-          top-本月最热 top-1-上月最热 hd-高清
+类别代码:
+ori-91原创 new-最新 hot-当前最热 top-本月最热 mf-收藏最多
+long-10分钟以上 longer-20分钟以上 md-本月讨论 tf-本月收藏
+rf-最近加精 hd-高清 lasttop-上月最热
 
 Usage:
   91dl [command]
 
 Available Commands:
   help        Help about any command
-  links       Download videos by links
-  pages       Download videos by pages with category
-  version     Print version info
+  links       按照链接下载
+  pages       按照页面下载
+  version     打印版本号
 
 Flags:
-      --config string     config file (default is ./config.yaml)
-  -d, --dir string        directory to save videos (default is ./91videos/)
-  -e, --exclude strings   exclude video host IPs
-  -h, --help              help for 91dl
-      --proxy string      net proxy, support http/socks5
+      --config string   配置文件 (默认不需要)
+  -d, --dir string      下载到指定文件夹 (默认下载到 ./91videos/)
+  -h, --help            help for 91dl
+      --proxy string    网络代理, 默认支持http/socks5
 
 Use "91dl [command] --help" for more information about a command.
+```
+
+### 按照页面下载
+
+默认下载：“当前最热”第1页下载到当前目录下91videos/
+
+```bash
+91dl pages
+```
+
+“本月最热”第1页到第3页下载到~/mydir
+
+```bash
+91dl pages --st 1 --ed 3 -t top -d ~/mydir
+```
+
+### 按照链接下载
+
+```bash
+91dl links -d ~/mydir -v "http://91porn.com/view_video.php?viewkey=0ff9f3af6e42aab264df&page=1&viewtype=basic&category=hot,http://91porn.com/view_video.php?viewkey=71fd50381078e11ca7eb&page=1&viewtype=basic&category=hot,http://91porn.com/view_video.php?viewkey=4a2512cf4bdf9fb8abe9&page=1&viewtype=basic&category=hot"
+```
+
+### 使用代理
+
+支持http/socks5
+
+```bash
+91dl pages --proxy http://127.0.0.1:1234
 ```

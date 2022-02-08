@@ -26,8 +26,8 @@ var t string
 // pagesCmd represents the hot command
 var pagesCmd = &cobra.Command{
 	Use:   "pages",
-	Short: "Download videos by pages with category",
-	Long:  `Download videos by pages with category`,
+	Short: "按照页面下载",
+	Long:  `按照页面下载`,
 	Run: func(cmd *cobra.Command, args []string) {
 		dl.Initialize()
 		dl.PagesDl(p1, p2, t)
@@ -37,7 +37,7 @@ var pagesCmd = &cobra.Command{
 func init() {
 	rootCmd.AddCommand(pagesCmd)
 
-	pagesCmd.Flags().StringVarP(&t, "type", "t", "hot", "category type: [new hot rp long md tf mf rf top top-1 hd]")
-	pagesCmd.Flags().IntVar(&p1, "st", 1, "start page")
-	pagesCmd.Flags().IntVar(&p2, "ed", 1, "end page")
+	pagesCmd.Flags().StringVarP(&t, "type", "t", "hot", "类别: [ori new hot rp long md tf mf rf top lasttop hd]")
+	pagesCmd.Flags().IntVar(&p1, "st", 1, "开始页")
+	pagesCmd.Flags().IntVar(&p2, "ed", 1, "结束页")
 }

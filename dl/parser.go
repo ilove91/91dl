@@ -40,7 +40,7 @@ func getHTML(u string) (*goquery.Document, error) {
 		return nil, err
 	}
 
-	doc, err := goquery.NewDocumentFromResponse(resp)
+	doc, err := goquery.NewDocumentFromReader(resp.Body)
 	if err != nil {
 		return nil, err
 	}
@@ -103,11 +103,6 @@ func parseVideo(u string) (*video, error) {
 	title = fmt.Sprintf("[%s] %s", number, title)
 	r := strings.NewReplacer("\\", " ", "/", " ", ":", " ", "*", " ", "?", " ", "\"", " ", "<", " ", ">", " ", "|", " ")
 	title = r.Replace(title)
-
-	// log.Info(title)
-	// log.Info(u)
-	// log.Info(videoSrc)
-	// log.Info(number)
 
 	return &video{u, title, videoSrc}, nil
 }

@@ -24,8 +24,8 @@ var vlinks []string
 // linksCmd represents the links command
 var linksCmd = &cobra.Command{
 	Use:   "links",
-	Short: "Download videos by links",
-	Long:  `Download videos by links`,
+	Short: "按照链接下载",
+	Long:  `按照链接下载`,
 	Run: func(cmd *cobra.Command, args []string) {
 		dl.Initialize()
 		dl.LinksDl(vlinks)
@@ -35,5 +35,5 @@ var linksCmd = &cobra.Command{
 func init() {
 	rootCmd.AddCommand(linksCmd)
 
-	linksCmd.Flags().StringSliceVarP(&vlinks, "videos", "v", nil, "videos links")
+	linksCmd.Flags().StringSliceVarP(&vlinks, "videos", "v", nil, "视频页面链接")
 }

@@ -20,13 +20,13 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var version = "2.0 20210304"
+var version = "2.1 20220208"
 
 // versionCmd represents the version command
 var versionCmd = &cobra.Command{
 	Use:   "version",
-	Short: "Print version info",
-	Long:  `Print version info`,
+	Short: "打印版本号",
+	Long:  `打印版本号`,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Printf("91dl v%s - for 91porn lovers\n", version)
 	},

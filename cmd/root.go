@@ -27,11 +27,14 @@ var cfgFile string
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "91dl",
-	Short: "Downloader for 91porn",
-	Long: `Downloader for 91porn
+	Short: "91porn视频下载器",
+	Long: `91porn视频下载器
 
-Category: new-最新 hot-当前最热 top-本月最热 long-10分钟以上 longer-20分钟以上
-          md-本月讨论 tf-本月收藏 mf-收藏最多 rf-最近加精 hd-高清 lasttop-上月最热`,
+类别代码: 
+ori-91原创 new-最新 hot-当前最热 top-本月最热 mf-收藏最多
+long-10分钟以上 longer-20分钟以上 md-本月讨论 tf-本月收藏
+rf-最近加精 hd-高清 lasttop-上月最热
+`,
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
@@ -46,10 +49,9 @@ func Execute() {
 func init() {
 	cobra.OnInitialize(initConfig)
 
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is ./config.yaml)")
-	rootCmd.PersistentFlags().StringP("dir", "d", "", "directory to save videos (default is ./91videos/)")
-	rootCmd.PersistentFlags().String("proxy", "", "net proxy, support http/socks5")
-	rootCmd.PersistentFlags().StringSliceP("exclude", "e", nil, "exclude video host IPs")
+	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "配置文件 (默认不需要)")
+	rootCmd.PersistentFlags().StringP("dir", "d", "", "下载到指定文件夹 (默认下载到 ./91videos/)")
+	rootCmd.PersistentFlags().String("proxy", "", "网络代理, 默认支持http/socks5")
 	viper.BindPFlags(rootCmd.PersistentFlags())
 }
 
