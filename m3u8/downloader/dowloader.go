@@ -143,8 +143,8 @@ func (d *Downloader) download(segIndex int) error {
 	}
 	// Maybe it will be safer in this way...
 	atomic.AddInt32(&d.finish, 1)
-	//tool.DrawProgressBar("Downloading", float32(d.finish)/float32(d.segLen), progressWidth)
-	log.Infof("[downloaded %3d/%d] %s", d.finish, d.segLen, tsURL)
+	// tool.DrawProgressBar("Downloading", float32(d.finish)/float32(d.segLen), progressWidth)
+	// log.Infof("[downloaded %3d/%d] %s", d.finish, d.segLen, tsURL)
 	return nil
 }
 
@@ -203,7 +203,7 @@ func (d *Downloader) merge() error {
 	mergedCount := 0
 	for segIndex := 0; segIndex < d.segLen; segIndex++ {
 		tsFilename := tsFilename(segIndex)
-		bytes, err := ioutil.ReadFile(filepath.Join(d.tsFolder, tsFilename))
+		bytes, _ := ioutil.ReadFile(filepath.Join(d.tsFolder, tsFilename))
 		_, err = writer.Write(bytes)
 		if err != nil {
 			continue
