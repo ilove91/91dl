@@ -18,8 +18,11 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"time"
 
+	"github.com/cavaliergopher/grab/v3"
 	"github.com/ilove91/91dl/m3u8"
+	"github.com/schollz/progressbar/v3"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -41,11 +44,7 @@ func LinksDl(vlinks []string) {
 
 	for i, v := range vs {
 		if _, err := os.Stat(filepath.Join(destDir, v.title+".mp4")); os.IsNotExist(err) {
-			log.Infof("Downloading %3d  %s ...", i+1, v.title)
-			err := m3u8.Download(v.videoSrc, v.title, destDir, 25)
-			if err != nil {
-				log.Error(err)
-			}
+			download(i, v)
 		} else {
 			log.Infof("Exists %3d  %s ...", i+1, v.title)
 		}
@@ -77,4 +76,50 @@ func PagesDl(p1 int, p2 int, t string) {
 		LinksDl(vl)
 		log.Info("======================================")
 	}
+}
+
+func download(i int, v *video) {
+	toFile := filepath.Join(destDir, v.title+".mp4")
+	log.Infof("Downloading %3d  %s ...", i+1, v.title)
+
+	if v.mediaType == "m3u8" {
+		err := m3u8.Download(v.videoSrc, v.title, destDir, 25)
+		if err != nil {
+			log.Error(err)
+			return
+		}
+	}
+
+	if v.mediaType == "mp4" {
+		client := grab.NewClient()
+		tmpFile := toFile + ".tmp"
+		req, _ := grab.NewRequest(tmpFile, v.videoSrc)
+		resp := client.Do(req)
+
+		// start UI loop
+		t := time.NewTicker(1 * time.Second)
+		defer t.Stop()
+
+		bar := progressbar.DefaultBytes(resp.Size())
+
+	Loop:
+		for {
+			select {
+			case <-t.C:
+				bar.Set64(resp.BytesComplete())
+			case <-resp.Done:
+				bar.Finish()
+				break Loop
+			}
+		}
+
+		// check for errors
+		if err := resp.Err(); err != nil {
+			log.Error("Download failed: %v, v: %v", err, v.title)
+			return
+		}
+		os.Rename(tmpFile, toFile)
+	}
+
+	log.Info("[Done] ", toFile)
 }

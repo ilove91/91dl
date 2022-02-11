@@ -27,9 +27,10 @@ import (
 )
 
 type video struct {
-	webURL   string
-	title    string
-	videoSrc string
+	webURL    string
+	title     string
+	videoSrc  string
+	mediaType string
 }
 
 func getHTML(u string) (*goquery.Document, error) {
@@ -102,17 +103,35 @@ func parseVideo(u string) (*video, error) {
 		return nil, fmt.Errorf("video src %s", videoSrc)
 	}
 
-	compile = regexp.MustCompile(`m3u8/[\d]*/([\d]*).m3u8`)
-	submatch = compile.FindAllStringSubmatch(videoSrc, -1)
-	if len(submatch) != 1 {
-		return nil, fmt.Errorf("video number %s, %s", videoSrc, submatch)
+	vNumber, mediaType, err := parseMedia(videoSrc)
+	if err != nil {
+		return nil, err
 	}
-	number := submatch[0][1]
-	title = fmt.Sprintf("[%s] [%s] %s", number, author, title)
+	title = fmt.Sprintf("[%s] [%s] %s", vNumber, author, title)
 	r := strings.NewReplacer("\\", " ", "/", " ", ":", " ", "*", " ", "?", " ", "\"", " ", "<", " ", ">", " ", "|", " ")
 	title = r.Replace(title)
 
-	return &video{u, title, videoSrc}, nil
+	return &video{u, title, videoSrc, mediaType}, nil
+}
+
+func parseMedia(src string) (vNumber, mediaType string, err error) {
+	// m3u8
+	compile := regexp.MustCompile(`m3u8/[\d]*/([\d]*).m3u8`)
+	submatch := compile.FindAllStringSubmatch(src, -1)
+	if len(submatch) == 1 {
+		vNumber := submatch[0][1]
+		return vNumber, "m3u8", nil
+	}
+
+	// mp4
+	compile = regexp.MustCompile(`mp43/([\d]*).mp4\?st=.*`)
+	submatch = compile.FindAllStringSubmatch(src, -1)
+	if len(submatch) == 1 {
+		vNumber := submatch[0][1]
+		return vNumber, "mp4", nil
+	}
+
+	return "", "", fmt.Errorf("no media found in video src: %v", src)
 }
 
 func buildReq(u string) *http.Request {

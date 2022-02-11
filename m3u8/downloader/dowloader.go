@@ -12,6 +12,7 @@ import (
 
 	"github.com/ilove91/91dl/m3u8/parse"
 	"github.com/ilove91/91dl/m3u8/tool"
+	"github.com/schollz/progressbar/v3"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -30,6 +31,7 @@ type Downloader struct {
 	finish   int32
 	segLen   int
 	title    string
+	pb       *progressbar.ProgressBar
 
 	result *parse.Result
 }
@@ -52,6 +54,7 @@ func NewTask(destDir, url, title string) (*Downloader, error) {
 		title:    fmt.Sprintf("%s.mp4", title),
 	}
 	d.segLen = len(result.M3u8.Segments)
+	d.pb = progressbar.Default(int64(d.segLen))
 	d.queue = genSlice(d.segLen)
 	return d, nil
 }
@@ -145,6 +148,7 @@ func (d *Downloader) download(segIndex int) error {
 	atomic.AddInt32(&d.finish, 1)
 	// tool.DrawProgressBar("Downloading", float32(d.finish)/float32(d.segLen), progressWidth)
 	// log.Infof("[downloaded %3d/%d] %s", d.finish, d.segLen, tsURL)
+	d.pb.Add(1)
 	return nil
 }
 
@@ -219,7 +223,7 @@ func (d *Downloader) merge() error {
 		log.Errorf("[warning] %d files merge failed", d.segLen-mergedCount)
 	}
 
-	log.Info("[Done] ", mFilePath)
+	d.pb.Finish()
 
 	return nil
 }
