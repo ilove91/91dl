@@ -3,14 +3,12 @@ package tool
 import (
 	"fmt"
 	"io"
-	"net/http"
-	"time"
+
+	"github.com/ilove91/91dl/utils"
 )
 
 func Get(url string) (io.ReadCloser, error) {
-	c := http.Client{
-		Timeout: time.Duration(60) * time.Second,
-	}
+	c := utils.GetNewHttpClient(60)
 	resp, err := c.Get(url)
 	if err != nil {
 		return nil, err

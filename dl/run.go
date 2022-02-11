@@ -91,10 +91,9 @@ func download(i int, v *video) {
 	}
 
 	if v.mediaType == "mp4" {
-		client := grab.NewClient()
 		tmpFile := toFile + ".tmp"
 		req, _ := grab.NewRequest(tmpFile, v.videoSrc)
-		resp := client.Do(req)
+		resp := grabClient.Do(req)
 
 		// start UI loop
 		t := time.NewTicker(1 * time.Second)
@@ -108,14 +107,17 @@ func download(i int, v *video) {
 			case <-t.C:
 				bar.Set64(resp.BytesComplete())
 			case <-resp.Done:
-				bar.Finish()
+				bar.Set64(resp.BytesComplete())
+				if resp.BytesComplete() == resp.Size() {
+					bar.Finish()
+				}
 				break Loop
 			}
 		}
 
 		// check for errors
 		if err := resp.Err(); err != nil {
-			log.Error("Download failed: %v, v: %v", err, v.title)
+			log.Errorf("Download failed: %v, v: %v", err, v.title)
 			return
 		}
 		os.Rename(tmpFile, toFile)
