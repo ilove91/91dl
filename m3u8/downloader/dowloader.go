@@ -220,7 +220,9 @@ func (d *Downloader) merge() error {
 	_ = os.RemoveAll(d.tsFolder)
 
 	if mergedCount != d.segLen {
-		log.Errorf("[warning] %d files merge failed", d.segLen-mergedCount)
+		log.Errorf("[FAIL] %v %d files merge failed", d.title, d.segLen-mergedCount)
+		os.Remove(mFilePath)
+		return fmt.Errorf("%v incomplete", d.title)
 	}
 
 	d.pb.Finish()
