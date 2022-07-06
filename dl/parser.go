@@ -57,9 +57,8 @@ func parsePage(u string) []string {
 	var links []string
 	doc.Find(".videos-text-align a").Each(func(index int, item *goquery.Selection) {
 		link, _ := item.Attr("href")
-		title := item.Find(".video-title").Text()
-		log.Infof("%3d  %s url: %v", index+1, title, link)
-		if title != "" {
+		log.Infof("%3d url: %v", index+1, link)
+		if strings.HasPrefix(link, "http://91porn.com/view_video.php?viewkey=") {
 			links = append(links, link)
 		}
 	})
@@ -73,6 +72,7 @@ func parseVideo(u string) (*video, error) {
 	}
 
 	title := doc.Find("title").Text()
+	title = strings.ReplaceAll(title, ".", " ")
 	title = strings.ReplaceAll(title, "Chinese homemade video", "")
 	title = strings.TrimSpace(title)
 	title = strings.ReplaceAll(title, "\n", "")
